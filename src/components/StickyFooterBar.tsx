@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { Affiliate } from '../types';
-import { formatBonusOffer } from '../utils/affiliateDisplay';
+import { getLegalFooter } from '../utils/affiliateDisplay';
 import { openAffiliateUrl } from '../utils/affiliateLinks';
 import { stripHtml } from '../utils/html';
 import { useContentInsets } from '../utils/layout';
@@ -13,43 +14,72 @@ type Props = {
   onClose: () => void;
 };
 
+const STICKY_LEGAL_ITEMS = ['18+', 'Terms & Conditions', 'Play Responsibly', 'Be Gamble Aware'];
+
+function getStickyFooterLegalItems(meta: Affiliate['meta']): string[] {
+  const raw = getLegalFooter(meta, { trimEdgePipes: true })
+    .replace(/\s*\|\s*/g, '|')
+    .replace(/\bT&C\b/gi, 'Terms & Conditions')
+    .trim();
+
+  if (!raw) return STICKY_LEGAL_ITEMS;
+
+  const items = raw
+    .split('|')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return items.length > 0 ? items : STICKY_LEGAL_ITEMS;
+}
+
 export function StickyFooterBar({ affiliate, visible, onClose }: Props) {
   const { bottom } = useContentInsets();
+  const { width: screenWidth } = useWindowDimensions();
 
   if (!visible || !affiliate) return null;
 
   const { meta, thumbnail } = affiliate;
-  const offer = formatBonusOffer(
-    stripHtml(meta.bonus_title ?? ''),
-    stripHtml(meta.free_spins ?? ''),
-  );
-  const rtp = meta.detcasino_section01_2_detcasino_value_section1;
-
+  const bonusTitle = stripHtml(meta.bonus_title ?? '');
+  const freeSpins = stripHtml(meta.free_spins ?? '').replace(/^\+\s*/, '');
+  const legalItems = getStickyFooterLegalItems(meta);
   const openAffiliate = () => openAffiliateUrl(meta);
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: bottom }]}>
-      <View style={styles.bar}>
-        <Pressable onPress={onClose} hitSlop={12} style={styles.closeBtn}>
-          <Text style={styles.closeText}>×</Text>
-        </Pressable>
-        <View style={styles.logoWrap}>
-          <Image source={{ uri: thumbnail }} style={styles.logo} contentFit="contain" />
+    <View style={[styles.wrapper, { width: screenWidth }]}>
+      <LinearGradient
+        colors={['#22c55e', '#15803d']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      >
+        <View style={styles.bar}>
+          <Pressable onPress={onClose} hitSlop={12} style={styles.closeBtn}>
+            <Text style={styles.closeText}>×</Text>
+          </Pressable>
+          <View style={styles.logoWrap}>
+            <Image source={{ uri: thumbnail }} style={styles.logo} contentFit="contain" />
+          </View>
+          <View style={styles.offerWrap}>
+            <Text style={styles.offer} numberOfLines={2}>
+              {bonusTitle}
+              {freeSpins ? `\n+ ${freeSpins}` : ''}
+            </Text>
+          </View>
+          <Pressable style={styles.cta} onPress={openAffiliate}>
+            <Text style={styles.ctaText}>Bonus erhalten →</Text>
+          </Pressable>
         </View>
-        <View style={styles.offerWrap}>
-          {rtp ? <Text style={styles.rtp}>Gewinnrate: {Number(rtp).toFixed(2)}%</Text> : null}
-          <Text style={styles.offer} numberOfLines={2}>
-            {offer}
-          </Text>
-        </View>
-        <Pressable style={styles.cta} onPress={openAffiliate}>
-          <Text style={styles.ctaText}>Bonus erhalten</Text>
-        </Pressable>
-      </View>
 
-      <View style={styles.legal}>
-        <Text style={styles.legalText}>18+ · Terms & Conditions · Play Responsibly · Be Gamble Aware</Text>
-      </View>
+        <View style={[styles.legal, bottom > 0 && { paddingBottom: 4 + bottom }]}>
+          <View style={styles.legalRow}>
+            {legalItems.map((item) => (
+              <Text key={item} style={styles.legalText}>
+                {item}
+              </Text>
+            ))}
+          </View>
+        </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -60,33 +90,41 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    zIndex: 20,
+    elevation: 20,
+  },
+  gradient: {
+    width: '100%',
   },
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.green,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    gap: 8,
+    width: '100%',
+    paddingLeft: 4,
+    paddingRight: 8,
+    paddingVertical: 8,
+    gap: 6,
   },
   closeBtn: {
-    padding: 2,
+    width: 24,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeText: {
-    color: colors.text,
+    color: 'rgba(255,255,255,0.6)',
     fontSize: 20,
     lineHeight: 20,
-    fontWeight: '700',
+    fontWeight: '400',
   },
   logoWrap: {
-    backgroundColor: colors.purpleHeader,
+    backgroundColor: colors.primaryDark,
     borderRadius: 6,
+    width: 96,
+    height: 48,
     padding: 4,
-    width: 64,
-    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logo: {
     width: '100%',
@@ -94,22 +132,23 @@ const styles = StyleSheet.create({
   },
   offerWrap: {
     flex: 1,
-  },
-  rtp: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 9,
-    marginBottom: 2,
+    minWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   offer: {
     color: colors.text,
     fontWeight: '800',
-    fontSize: 11,
+    fontSize: 12,
+    lineHeight: 15,
+    textAlign: 'center',
   },
   cta: {
     backgroundColor: colors.ctaYellow,
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    flexShrink: 0,
   },
   ctaText: {
     color: '#111',
@@ -117,13 +156,22 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   legal: {
-    backgroundColor: colors.greenDark,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    paddingTop: 4,
+    paddingBottom: 4,
+    paddingHorizontal: 12,
+  },
+  legalRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   legalText: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 8,
-    textAlign: 'center',
+    color: 'rgba(255,255,255,0.95)',
+    fontSize: 10,
+    lineHeight: 13,
   },
 });

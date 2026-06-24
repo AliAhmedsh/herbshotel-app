@@ -16,6 +16,12 @@ export function extractImageUrl(html: string): string | null {
   return match?.[1] ?? null;
 }
 
+export function extractImageUrls(html: string): string[] {
+  return Array.from(html.matchAll(/<img\b[^>]*\bsrc=["']([^"']+)["']/gi))
+    .map((match) => match[1])
+    .filter(Boolean);
+}
+
 export function splitHtmlParagraphs(html: string): string[] {
   return html
     .split(/<\/p>/i)

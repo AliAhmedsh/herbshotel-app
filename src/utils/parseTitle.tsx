@@ -11,11 +11,11 @@ export function renderStyledPageTitle(html: string) {
   while ((match = regex.exec(html)) !== null) {
     if (match[1] !== undefined) {
       parts.push({
-        text: match[2].replace(/\s+/g, ' ').trim(),
+        text: match[2].replace(/\s+/g, ' '),
         primary: match[1].includes(PRIMARY_CLASS),
       });
     } else if (match[3]) {
-      parts.push({ text: match[3].replace(/\s+/g, ' ').trim(), primary: false });
+      parts.push({ text: match[3].replace(/\s+/g, ' '), primary: false });
     } else {
       parts.push({ text: '\n', primary: false });
     }
@@ -43,15 +43,15 @@ export function renderStyledPageTitle(html: string) {
 const styles = StyleSheet.create({
   title: {
     color: '#ffffff',
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    lineHeight: 32,
+    lineHeight: 29,
     textAlign: 'center',
   },
   titlePrimary: {
     color: colors.primary,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    lineHeight: 32,
+    lineHeight: 29,
   },
 });

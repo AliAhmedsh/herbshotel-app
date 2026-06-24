@@ -20,11 +20,14 @@ import { PageHeader } from '../components/PageHeader';
 import { SiteHeader } from '../components/SiteHeader';
 import { StickyFooterBar } from '../components/StickyFooterBar';
 import { TopListCard } from '../components/TopListCard';
+import { WeeklyHighlight } from '../components/WeeklyHighlight';
 
 type Props = {
   onReady?: () => void;
   showOfferPopup?: boolean;
 };
+
+const HIDE_STICKY_FOOTER_AFTER_OFFSET = 4200;
 
 export function TopListScreen({ onReady, showOfferPopup = false }: Props) {
   const { top, horizontal, listBottomPadding } = useContentInsets();
@@ -35,6 +38,7 @@ export function TopListScreen({ onReady, showOfferPopup = false }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [footerVisible, setFooterVisible] = useState(true);
   const [footerDismissed, setFooterDismissed] = useState(false);
+  const [offerVisible, setOfferVisible] = useState(false);
   const lastOffset = useRef(0);
   const readyNotified = useRef(false);
 
@@ -70,6 +74,12 @@ export function TopListScreen({ onReady, showOfferPopup = false }: Props) {
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const y = event.nativeEvent.contentOffset.y;
     const delta = y - lastOffset.current;
+    if (y > HIDE_STICKY_FOOTER_AFTER_OFFSET) {
+      setFooterVisible(false);
+      lastOffset.current = y;
+      return;
+    }
+
     if (Math.abs(delta) > 8) {
       setFooterVisible(delta < 0 || y < 40);
       lastOffset.current = y;
@@ -79,7 +89,7 @@ export function TopListScreen({ onReady, showOfferPopup = false }: Props) {
   const listStyle = {
     paddingTop: top,
     paddingHorizontal: horizontal,
-    paddingBottom: footerDismissed ? horizontal : listBottomPadding,
+    paddingBottom: footerDismissed || !footerVisible ? horizontal : listBottomPadding,
   };
 
   if (loading) {
@@ -132,21 +142,26 @@ export function TopListScreen({ onReady, showOfferPopup = false }: Props) {
         ListHeaderComponent={
           <>
             <SiteHeader contentPadding={horizontal} />
-            <PageHeader pageMeta={pageMeta} />
+            <PageHeader pageMeta={pageMeta} contentPadding={horizontal} />
           </>
         }
         renderItem={({ item, index }) => <TopListCard affiliate={item} rank={index + 1} />}
         ListFooterComponent={
           <>
             <InfoSections pageMeta={pageMeta} />
-            <AppFooter />
+            <WeeklyHighlight affiliate={affiliates[0]} />
+            <AppFooter pageMeta={pageMeta} />
           </>
         }
       />
 
-      <OfferPopup affiliates={affiliates} canShow={showOfferPopup} />
+      <OfferPopup
+        affiliates={affiliates}
+        canShow={showOfferPopup}
+        onVisibilityChange={setOfferVisible}
+      />
 
-      {!footerDismissed && footerAffiliate ? (
+      {!footerDismissed && footerAffiliate && !offerVisible ? (
         <StickyFooterBar
           affiliate={footerAffiliate}
           visible={footerVisible}
@@ -161,6 +176,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+    overflow: 'visible',
   },
   center: {
     flex: 1,
