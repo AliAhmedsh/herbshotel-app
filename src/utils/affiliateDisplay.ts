@@ -56,15 +56,18 @@ export function getVoteCount(meta: AffiliateMeta, rank: number): string {
   if (raw) {
     const numeric = parseInt(raw.replace(/\D/g, ''), 10);
     if (Number.isFinite(numeric) && numeric > 0) {
-      return numeric.toLocaleString('de-DE');
+      return String(numeric);
     }
   }
 
   const fallback = RANK_FALLBACKS[rank]?.votes;
-  return fallback ? fallback.toLocaleString('de-DE') : '0';
+  return fallback ? String(fallback) : '0';
 }
 
 export function getPlayersOnline(meta: AffiliateMeta, rank: number): number {
+  const fallback = RANK_FALLBACKS[rank]?.players;
+  if (fallback) return fallback;
+
   const raw = metaString(meta, 'players_online', 'spieler_online', 'active_players', 'playing_now');
 
   if (raw) {
@@ -72,7 +75,7 @@ export function getPlayersOnline(meta: AffiliateMeta, rank: number): number {
     if (Number.isFinite(numeric) && numeric > 0) return numeric;
   }
 
-  return RANK_FALLBACKS[rank]?.players ?? 0;
+  return 0;
 }
 
 export function getRtp(meta: AffiliateMeta): number | null {
@@ -97,13 +100,23 @@ export function formatBonusOffer(bonusTitle: string, freeSpins?: string): string
   return spins ? `${bonus} + ${spins}` : bonus;
 }
 
-export function getLegalFooter(meta: AffiliateMeta): string {
+export const HIGHLIGHT_PLAYERS_ONLINE = 19418;
+
+export function getHighlightPlayersOnline(): number {
+  return HIGHLIGHT_PLAYERS_ONLINE;
+}
+
+export function getLegalFooter(meta: AffiliateMeta, options?: { trimEdgePipes?: boolean }): string {
   const raw = meta.copyright_txt ?? meta.copyright_txt_html ?? '';
-  const cleaned = raw
+  let cleaned = raw
     .replace(/<[^>]+>/g, '|')
     .replace(/\|+/g, ' | ')
     .replace(/\s+/g, ' ')
     .trim();
+
+  if (options?.trimEdgePipes) {
+    cleaned = cleaned.replace(/^\|\s*/, '').replace(/\s*\|$/, '').trim();
+  }
 
   return cleaned || '18+ | T&C | Play Responsibly | Be Gamble Aware';
 }

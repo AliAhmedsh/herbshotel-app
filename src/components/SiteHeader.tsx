@@ -25,13 +25,14 @@ export function SiteHeader({ contentPadding }: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.headerBg,
-    paddingVertical: 14,
+    paddingTop: 12,
+    paddingBottom: 8,
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   logo: {
-    width: 200,
-    height: 40,
+    width: 240,
+    height: 54,
   },
 });

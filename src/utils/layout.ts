@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export const CONTENT_PADDING = 16;
 
 /** Sticky footer bar height excluding safe-area bottom inset. */
-export const STICKY_FOOTER_HEIGHT = 96;
+export const STICKY_FOOTER_HEIGHT = 84;
 
 export function useContentInsets() {
   const insets = useSafeAreaInsets();
