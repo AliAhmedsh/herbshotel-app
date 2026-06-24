@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Top 10 DE casinos",
+    "slug": "top10-de-casino",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#1a4a9e",
+    "splash": {
+      "image": "./assets/splashbackground.png",
+      "backgroundColor": "#1a4a9e",
+      "resizeMode": "cover"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aliahmed724.herbshotelapp",
+      "splash": {
+        "image": "./assets/splashbackground.png",
+        "backgroundColor": "#1a4a9e",
+        "resizeMode": "cover"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a4a9e",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.aliahmed724.herbshotelapp",
+      "label": "Top 10 DE casinos",
+      "splash": {
+        "image": "./assets/splashbackground.png",
+        "backgroundColor": "#1a4a9e",
+        "resizeMode": "cover"
+      }
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splashbackground.png",
+          "backgroundColor": "#1a4a9e",
+          "resizeMode": "cover",
+          "imageWidth": 400,
+          "android": {
+            "image": "./assets/splashbackground.png",
+            "backgroundColor": "#1a4a9e",
+            "resizeMode": "cover",
+            "imageWidth": 400
+          },
+          "ios": {
+            "image": "./assets/splashbackground.png",
+            "backgroundColor": "#1a4a9e",
+            "resizeMode": "cover",
+            "imageWidth": 400
+          }
+        }
+      ]
+    ]
+  }
+}
